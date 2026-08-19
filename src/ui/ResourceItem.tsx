@@ -42,16 +42,10 @@ export function ResourceItem({ entry }: { entry: ResourceEntry }) {
             <div class={`attr-row ${row.changed ? "attr-changed" : "attr-unchanged"}`} key={row.key}>
               <div class="attr-key">{row.key}</div>
               <div class="attr-values">
-                <span class="attr-before">
-                  {row.sensitive ? "(sensitive)" : formatValue(row.before)}
-                </span>
+                <span class="attr-before">{formatValue(row.before)}</span>
                 <span class="attr-arrow">→</span>
                 <span class={`attr-after ${row.unknown ? "attr-unknown" : ""}`}>
-                  {row.sensitive
-                    ? "(sensitive)"
-                    : row.unknown
-                      ? "(known after apply)"
-                      : formatValue(row.after)}
+                  {row.unknown ? "(known after apply)" : formatValue(row.after)}
                 </span>
               </div>
             </div>

@@ -1,6 +1,6 @@
 import type { ActionKind, TfPlan, TfResourceChange } from "../planTypes.js";
 import { toActionKind } from "../planTypes.js";
-import { isSensitive } from "./diff.js";
+import { redactSensitive } from "./diff.js";
 
 export interface ResourceEntry {
   address: string;
@@ -13,7 +13,6 @@ export interface OutputEntry {
   actionKind: ActionKind;
   before: unknown;
   after: unknown;
-  sensitive: boolean;
 }
 
 export interface PlanSummary {
@@ -35,16 +34,12 @@ export function buildResourceEntries(plan: TfPlan): ResourceEntry[] {
 
 export function buildOutputEntries(plan: TfPlan): OutputEntry[] {
   return Object.entries(plan.output_changes ?? {})
-    .map(([name, change]) => {
-      const sensitive = isSensitive(change.before_sensitive) || isSensitive(change.after_sensitive);
-      return {
-        name,
-        actionKind: toActionKind(change.actions),
-        before: change.before,
-        after: change.after,
-        sensitive,
-      };
-    })
+    .map(([name, change]) => ({
+      name,
+      actionKind: toActionKind(change.actions),
+      before: redactSensitive(change.before, change.before_sensitive),
+      after: redactSensitive(change.after, change.after_sensitive),
+    }))
     .filter((entry) => entry.actionKind !== "no-op");
 }
 

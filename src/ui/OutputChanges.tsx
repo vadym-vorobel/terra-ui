@@ -23,9 +23,9 @@ export function OutputChanges({ outputs }: { outputs: OutputEntry[] }) {
               <span class={`badge ${badge.className}`}>{badge.label}</span>
               <span class="output-name">{out.name}</span>
               <span class="attr-values">
-                <span class="attr-before">{out.sensitive ? "(sensitive)" : formatValue(out.before)}</span>
+                <span class="attr-before">{formatValue(out.before)}</span>
                 <span class="attr-arrow">→</span>
-                <span class="attr-after">{out.sensitive ? "(sensitive)" : formatValue(out.after)}</span>
+                <span class="attr-after">{formatValue(out.after)}</span>
               </span>
             </div>
           );
