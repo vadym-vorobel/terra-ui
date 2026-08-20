@@ -256,6 +256,55 @@ body {
   opacity: 0.7;
 }
 
+.json-diff {
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre;
+  flex: 1 1 100%;
+}
+
+.json-diff-line {
+  display: flex;
+  gap: 8px;
+}
+
+.json-diff-marker {
+  flex-shrink: 0;
+  width: 12px;
+  text-align: center;
+  color: var(--text-muted);
+  user-select: none;
+}
+
+.json-diff-context {
+  color: var(--text);
+}
+
+.json-diff-add {
+  background: var(--create-bg);
+  color: var(--create);
+}
+
+.json-diff-add .json-diff-marker {
+  color: var(--create);
+}
+
+.json-diff-remove {
+  background: var(--delete-bg);
+  color: var(--delete);
+}
+
+.json-diff-remove .json-diff-marker {
+  color: var(--delete);
+}
+
 .toggle-unchanged {
   margin-top: 8px;
   background: none;

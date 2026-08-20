@@ -1,5 +1,5 @@
 import type { OutputEntry } from "./planData.js";
-import { formatValue } from "./diff.js";
+import { ValueDiff } from "./ValueDiff.js";
 
 const ACTION_BADGE: Record<string, { label: string; className: string }> = {
   create: { label: "create", className: "badge-create" },
@@ -22,11 +22,7 @@ export function OutputChanges({ outputs }: { outputs: OutputEntry[] }) {
             <div class="output-row" key={out.name}>
               <span class={`badge ${badge.className}`}>{badge.label}</span>
               <span class="output-name">{out.name}</span>
-              <span class="attr-values">
-                <span class="attr-before">{formatValue(out.before)}</span>
-                <span class="attr-arrow">→</span>
-                <span class="attr-after">{formatValue(out.after)}</span>
-              </span>
+              <ValueDiff before={out.before} after={out.after} />
             </div>
           );
         })}

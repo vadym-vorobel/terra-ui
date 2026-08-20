@@ -84,3 +84,86 @@ export function formatValue(value: unknown): string {
   const json = JSON.stringify(value, null, 2);
   return json.split(`"${SENSITIVE_MARKER}"`).join("(sensitive value)");
 }
+
+export interface JsonDiffLine {
+  type: "add" | "remove" | "context";
+  text: string;
+}
+
+// Normalizes a value into an object/array for structural diffing. Handles
+// both attributes that are already structured (e.g. a tags map) and ones
+// that are JSON-encoded strings (e.g. an aws_iam_policy `policy` attribute) —
+// terraform's own plan renderer treats both the same way.
+function asJsonContainer(value: unknown): unknown {
+  if (value === undefined) return undefined;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === "object" ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  if (value !== null && typeof value === "object") return value;
+  return undefined;
+}
+
+function stringifyContainer(value: unknown): string {
+  if (value === undefined) return "";
+  const json = JSON.stringify(value, null, 2);
+  return json.split(`"${SENSITIVE_MARKER}"`).join("(sensitive value)");
+}
+
+// Line-based LCS diff over the pretty-printed JSON. Good enough for plan
+// output: a single changed key becomes a remove+add pair, an added array
+// element becomes a contiguous block of "+" lines, etc.
+function diffLines(before: string[], after: string[]): JsonDiffLine[] {
+  const n = before.length;
+  const m = after.length;
+  const dp: number[][] = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] =
+        before[i] === after[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+
+  const lines: JsonDiffLine[] = [];
+  let i = 0;
+  let j = 0;
+  while (i < n && j < m) {
+    if (before[i] === after[j]) {
+      lines.push({ type: "context", text: before[i] });
+      i++;
+      j++;
+    } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+      lines.push({ type: "remove", text: before[i] });
+      i++;
+    } else {
+      lines.push({ type: "add", text: after[j] });
+      j++;
+    }
+  }
+  while (i < n) lines.push({ type: "remove", text: before[i++] });
+  while (j < m) lines.push({ type: "add", text: after[j++] });
+  return lines;
+}
+
+// Attempts a structural diff for attribute values that are JSON-shaped
+// (objects, arrays, or JSON-encoded strings). Returns undefined when either
+// side isn't JSON-shaped, so callers can fall back to plain before/after text.
+export function tryDiffJson(before: unknown, after: unknown): JsonDiffLine[] | undefined {
+  const beforeOk = before === undefined || asJsonContainer(before) !== undefined;
+  const afterOk = after === undefined || asJsonContainer(after) !== undefined;
+  if (!beforeOk || !afterOk) return undefined;
+
+  const beforeContainer = asJsonContainer(before);
+  const afterContainer = asJsonContainer(after);
+  if (beforeContainer === undefined && afterContainer === undefined) return undefined;
+
+  const beforeText = stringifyContainer(beforeContainer);
+  const afterText = stringifyContainer(afterContainer);
+  if (beforeText === afterText) return undefined;
+
+  return diffLines(beforeText.split("\n"), afterText.split("\n"));
+}

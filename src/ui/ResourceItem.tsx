@@ -1,7 +1,8 @@
 import { useState } from "preact/hooks";
 import type { ResourceEntry } from "./planData.js";
-import { diffAttributes, formatValue } from "./diff.js";
+import { diffAttributes } from "./diff.js";
 import { CopyButton } from "./CopyButton.js";
+import { ValueDiff } from "./ValueDiff.js";
 
 const ACTION_BADGE: Record<string, { label: string; className: string }> = {
   create: { label: "create", className: "badge-create" },
@@ -41,13 +42,7 @@ export function ResourceItem({ entry }: { entry: ResourceEntry }) {
           {visibleRows.map((row) => (
             <div class={`attr-row ${row.changed ? "attr-changed" : "attr-unchanged"}`} key={row.key}>
               <div class="attr-key">{row.key}</div>
-              <div class="attr-values">
-                <span class="attr-before">{formatValue(row.before)}</span>
-                <span class="attr-arrow">→</span>
-                <span class={`attr-after ${row.unknown ? "attr-unknown" : ""}`}>
-                  {row.unknown ? "(known after apply)" : formatValue(row.after)}
-                </span>
-              </div>
+              <ValueDiff before={row.before} after={row.after} unknown={row.unknown} />
             </div>
           ))}
 
