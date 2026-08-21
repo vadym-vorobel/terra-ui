@@ -36,7 +36,7 @@ Or clone and build it yourself:
 git clone https://github.com/vadym-vorobel/terra-ui.git
 cd terra-ui
 npm install
-npm run build
+node scripts/build.js
 npm link
 ```
 
@@ -82,13 +82,17 @@ terragrunt show -json tfplan | terra-ui
 
 ## Releasing
 
-`dist/` is committed to the repo (not built on install) because `npm install
--g github:...` runs a package's `prepare` script without first installing
-its `devDependencies`, so an install-time build isn't reliable for a
-global git install. Before tagging a release:
+`dist/` is committed to the repo (not built on install), and `package.json`
+has no `scripts` field. Both are required for `npm install -g github:...` to
+work: an install-time build isn't reliable for global git installs (the
+`prepare` script runs without `devDependencies` installed), and a `scripts`
+entry — even unrelated to installing — makes npm symlink the global install
+to its temporary git-clone cache dir instead of copying it in, which breaks
+once that temp dir is cleaned up. Use `node scripts/build.js` /
+`npx tsc --noEmit` directly instead of `npm run`. Before tagging a release:
 
 ```bash
-npm run build
+node scripts/build.js
 git add dist
 git commit -m "Build vX.Y.Z"
 git tag vX.Y.Z

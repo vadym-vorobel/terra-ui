@@ -9,10 +9,6 @@
   "files": [
     "dist"
   ],
-  "scripts": {
-    "build": "node scripts/build.js",
-    "typecheck": "tsc --noEmit"
-  },
   "license": "MIT",
   "dependencies": {
     "open": "^10.1.0",
