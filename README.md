@@ -79,3 +79,18 @@ terragrunt show -json tfplan | terra-ui
 ## Requirements
 
 - Node.js >= 18
+
+## Releasing
+
+`dist/` is committed to the repo (not built on install) because `npm install
+-g github:...` runs a package's `prepare` script without first installing
+its `devDependencies`, so an install-time build isn't reliable for a
+global git install. Before tagging a release:
+
+```bash
+npm run build
+git add dist
+git commit -m "Build vX.Y.Z"
+git tag vX.Y.Z
+git push origin main --tags
+```
