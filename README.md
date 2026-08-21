@@ -27,7 +27,7 @@ plan text in the terminal to figure out what's actually changing.
 Install directly from a GitHub release tag:
 
 ```bash
-npm install -g github:vadym-vorobel/terra-ui#v0.0.1
+npm install -g github:vadym-vorobel/terra-ui#v0.1.0
 ```
 
 Or clone and build it yourself:
